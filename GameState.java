@@ -168,7 +168,7 @@ public class GameState {
   }
 
   private boolean isValidCapture(int endFile, int endRank) {
-    return pieces[endRank][endFile] != PieceType.EMPTY;
+    return pieces[endRank][endFile] != PieceType.EMPTY  &&  pieceOwners[endRank][endFile] != turn;
   }
 
   private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
