@@ -68,7 +68,7 @@ public class GameState {
     pieces = STARTING_PIECES; 
     pieceOwners = STARTING_PLAYERS; 
     turn = Player.WHITE; 
-  } 
+  }
   /* Turns the board state into a string like the following: 
   * R N B Q K B N R 
   * P P P P P P P P 
@@ -154,7 +154,24 @@ public class GameState {
     return result; 
   } 
 
-  public void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
+  private static int upDirection(Player player) {
+    switch(player) {
+      case WHITE:
+        return 1;
+      case BLACK:
+        return -1;
+      case NONE:
+        return 0;
+    }
+
+    return 0;
+  }
+
+  private boolean isValidCapture(int endFile, int endRank) {
+    return pieces[endRank][endFile] != PieceType.EMPTY;
+  }
+
+  private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
     if (startRank<0 || startRank>7 || startFile<0 || startFile>7 || endRank<0 || endRank>7 || endFile<0 || endFile>7) {
       throw new Exception("Args not in bounds");
     }
@@ -163,6 +180,44 @@ public class GameState {
     }
     if (pieceOwners[startRank][startFile] != turn) {
       throw new Exception("Can't move that piece");
+    }
+    boolean inCheck = false;
+    if (inCheck) {
+      // check to see if the move puts you out of check
+      // if so, continue
+      // if not, throw illegal move exception
+    }
+    switch (pieces[startRank][startFile]) {
+      case PAWN:
+        // Non taking move
+        if (startFile == endFile) {
+          // Moved up 1
+          if (endRank-startRank == upDirection(turn)) {
+            if (pieces[endRank][endFile] == PieceType.EMPTY) {
+              break;
+            }
+          }
+          // Moved up 2
+          else if (endRank-startRank == 2*upDirection(turn)) {
+            if (pieces[endRank][endFile] == PieceType.EMPTY  &&  pieces[startRank+upDirection(turn)][endFile] == PieceType.EMPTY
+                  &&  startRank==(int) (3.5f-2.5f*(float)upDirection(turn))) {
+              break;
+            }
+          }
+        }
+        // Taking move
+        else {
+          // Valid diagonal
+          if (Math.abs(startFile-endFile) == 1  &&  endRank-startRank == upDirection(turn)) {
+            if (isValidCapture(endFile, endRank)) {
+              break;
+            }
+          }
+        }
+        throw new Exception("Illegal move");
+      
+      default:
+        break;
     }
 
     pieces[endRank][endFile] = pieces[startRank][startFile];
