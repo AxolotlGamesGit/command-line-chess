@@ -24,33 +24,33 @@ public class GameState {
                                                 { PieceType.EMPTY, PieceType.EMPTY,  PieceType.EMPTY,  PieceType.EMPTY, PieceType.EMPTY, PieceType.EMPTY,  PieceType.EMPTY,  PieceType.EMPTY }, 
                                                 { PieceType.PAWN,  PieceType.PAWN,   PieceType.PAWN,   PieceType.PAWN,  PieceType.PAWN,  PieceType.PAWN,   PieceType.PAWN,   PieceType.PAWN }, 
                                                 { PieceType.ROOK,  PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN, PieceType.KING,  PieceType.BISHOP, PieceType.KNIGHT, PieceType.ROOK }}; 
-  public final Player[][] STARTING_PLAYERS = {{Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK}, 
-                                              {Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK}, 
-                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
-                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
-                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
-                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
+  public final Player[][] STARTING_PLAYERS = {{Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}, 
                                               {Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}, 
-                                              {Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}};
+                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
+                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
+                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
+                                              {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
+                                              {Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK}, 
+                                              {Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK, Player.BLACK}};
   final Map<Character, Integer> FILES = Map.ofEntries(
     entry('a', 0),
-    entry('b', 2),
-    entry('c', 3),
-    entry('d', 4),
-    entry('e', 5),
-    entry('f', 6),
-    entry('g', 7),
-    entry('h', 8)
+    entry('b', 1),
+    entry('c', 2),
+    entry('d', 3),
+    entry('e', 4),
+    entry('f', 5),
+    entry('g', 6),
+    entry('h', 7)
   );
   final Map<Character, Integer> RANKS = Map.ofEntries(
     entry('1', 0),
-    entry('2', 2),
-    entry('3', 3),
-    entry('4', 4),
-    entry('5', 5),
-    entry('6', 6),
-    entry('7', 7),
-    entry('8', 8)
+    entry('2', 1),
+    entry('3', 2),
+    entry('4', 3),
+    entry('5', 4),
+    entry('6', 5),
+    entry('7', 6),
+    entry('8', 7)
   );
   final Map<Character, PieceType> PIECES = Map.ofEntries(
     entry('P', PieceType.PAWN),
@@ -81,7 +81,7 @@ public class GameState {
   */ 
   public String toString() { 
     String result = ""; 
-    for (int i = 0; i < 8; i++) { 
+    for (int i = 7; i >= 0; i--) { 
       for (int j = 0; j < 8; j++) { 
         if (pieceOwners[i][j] == Player.BLACK) { 
           switch(pieces[i][j]) { 
@@ -89,22 +89,22 @@ public class GameState {
               result += " "; 
               break; 
             case PAWN: 
-              result += "P"; 
+              result += "p"; 
               break; 
             case BISHOP: 
-              result += "B"; 
+              result += "b"; 
               break; 
             case KNIGHT: 
-              result += "N"; 
+              result += "n"; 
               break; 
             case ROOK: 
-              result += "R"; 
+              result += "r"; 
               break; 
             case QUEEN: 
-              result += "Q"; 
+              result += "q"; 
               break; 
             case KING: 
-              result += "K"; 
+              result += "k"; 
               break; 
           } 
         } 
@@ -133,11 +133,11 @@ public class GameState {
               break; 
           }
         } 
-        else { 
+        else {
           result += " "; 
-        } 
+        }
         result += " "; 
-      } 
+      }
       result += "\n"; 
     } 
     switch(turn) { 
@@ -145,7 +145,7 @@ public class GameState {
         result += "White to move"; 
         break; 
       case BLACK: 
-        result += "White to move"; 
+        result += "Black to move"; 
         break; 
       case NONE: 
         result += "Game over"; 
@@ -169,14 +169,39 @@ public class GameState {
     pieceOwners[endRank][endFile] = turn;
     pieces[startRank][startFile] = PieceType.EMPTY;
     pieceOwners[startRank][startFile] = Player.NONE;
+
+    if (turn == Player.WHITE) {
+      turn = Player.BLACK;
+    }
+    else {
+      turn = Player.WHITE;
+    }
   }
 
   public void parseMove(String move) throws Exception {
+    int startFile = 0;
+    int startRank = 0;
+    int endFile = 0;
+    int endRank = 0;
     if (move.length() < 2) {
       throw new Exception("Move not even long enough");
     }
-    if(RANKS.containsKey(move.charAt(0))  &&  FILES.containsKey(move.charAt(1))) {
-      // Do custom notation
+    if(move.length() == 6  &&  move.charAt(2) == '-'  &&  move.charAt(3) == '>') {
+      if (FILES.containsKey(move.charAt(0))  &&  RANKS.containsKey(move.charAt(1))) {
+        startFile = FILES.get(move.charAt(0));
+        startRank = RANKS.get(move.charAt(1));
+      }
+      else {
+        throw new Exception("Invalid starting square");
+      }
+
+      if (FILES.containsKey(move.charAt(4))  &&  RANKS.containsKey(move.charAt(5))) {
+        endFile = FILES.get(move.charAt(4));
+        endRank = RANKS.get(move.charAt(5));
+      }
+      else {
+        throw new Exception("Invalid ending square");
+      }
     }
     else if(PIECES.containsKey(move.charAt(0))) {
       // Algebraic chess notation
@@ -187,5 +212,7 @@ public class GameState {
     else if (move == "0-0-0"  ||  move == "O-O-O") {
       // Queen side
     }
+
+    move(startFile, startRank, endFile, endRank);
   }
 }
