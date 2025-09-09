@@ -1,3 +1,6 @@
+import java.util.Map;
+import static java.util.Map.entry;    
+
 public class GameState { 
   public enum PieceType { 
     EMPTY, 
@@ -28,7 +31,35 @@ public class GameState {
                                               {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
                                               {Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE,  Player.NONE }, 
                                               {Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}, 
-                                              {Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}}; 
+                                              {Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE, Player.WHITE}};
+  final Map<Character, Integer> FILES = Map.ofEntries(
+    entry('a', 0),
+    entry('b', 2),
+    entry('c', 3),
+    entry('d', 4),
+    entry('e', 5),
+    entry('f', 6),
+    entry('g', 7),
+    entry('h', 8)
+  );
+  final Map<Character, Integer> RANKS = Map.ofEntries(
+    entry('1', 0),
+    entry('2', 2),
+    entry('3', 3),
+    entry('4', 4),
+    entry('5', 5),
+    entry('6', 6),
+    entry('7', 7),
+    entry('8', 8)
+  );
+  final Map<Character, PieceType> PIECES = Map.ofEntries(
+    entry('P', PieceType.PAWN),
+    entry('N', PieceType.KNIGHT),
+    entry('B', PieceType.BISHOP),
+    entry('R', PieceType.ROOK),
+    entry('Q', PieceType.QUEEN),
+    entry('K', PieceType.KING)
+  );
 
   private PieceType[][] pieces; 
   private Player[][] pieceOwners; 
@@ -122,4 +153,39 @@ public class GameState {
     } 
     return result; 
   } 
+
+  public void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
+    if (startRank<0 || startRank>7 || startFile<0 || startFile>7 || endRank<0 || endRank>7 || endFile<0 || endFile>7) {
+      throw new Exception("Args not in bounds");
+    }
+    if (pieces[startRank][startFile] == PieceType.EMPTY) {
+      throw new Exception("No piece found");
+    }
+    if (pieceOwners[startRank][startFile] != turn) {
+      throw new Exception("Can't move that piece");
+    }
+
+    pieces[endRank][endFile] = pieces[startRank][startFile];
+    pieceOwners[endRank][endFile] = turn;
+    pieces[startRank][startFile] = PieceType.EMPTY;
+    pieceOwners[startRank][startFile] = Player.NONE;
+  }
+
+  public void parseMove(String move) throws Exception {
+    if (move.length() < 2) {
+      throw new Exception("Move not even long enough");
+    }
+    if(RANKS.containsKey(move.charAt(0))  &&  FILES.containsKey(move.charAt(1))) {
+      // Do custom notation
+    }
+    else if(PIECES.containsKey(move.charAt(0))) {
+      // Algebraic chess notation
+    }
+    else if (move == "0-0"  ||  move == "O-O") {
+      // King side
+    }
+    else if (move == "0-0-0"  ||  move == "O-O-O") {
+      // Queen side
+    }
+  }
 }
