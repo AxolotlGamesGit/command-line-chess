@@ -193,52 +193,116 @@ public class GameState {
         if (startFile == endFile) {
           // Moved up 1
           if (endRank-startRank == upDirection(turn)) {
-            if (pieces[endRank][endFile] == PieceType.EMPTY) {
-              break;
+            // Is already occupied
+            if (pieces[endRank][endFile] != PieceType.EMPTY) {
+              throw new Exception("Illegal move");
             }
           }
           // Moved up 2
           else if (endRank-startRank == 2*upDirection(turn)) {
-            if (pieces[endRank][endFile] == PieceType.EMPTY  &&  pieces[startRank+upDirection(turn)][endFile] == PieceType.EMPTY
-                  &&  startRank==(int) (3.5f-2.5f*(float)upDirection(turn))) {
-              break;
+            // Checks if the two spaces in front are empty
+            if (pieces[endRank][endFile] != PieceType.EMPTY  ||  pieces[startRank+upDirection(turn)][endFile] != PieceType.EMPTY) {
+              throw new Exception("Illegal move");
+            }
+            // Wrong starting rank
+            if (startRank != (int) (3.5f-2.5f*(float)upDirection(turn))) {
+              throw new Exception("Illegal move");
             }
           }
         }
         // Taking move
         else {
-          // Valid diagonal
-          if (Math.abs(startFile-endFile) == 1  &&  endRank-startRank == upDirection(turn)) {
-            if (isValidCapture(endFile, endRank)) {
-              break;
-            }
-          }
-        }
-        throw new Exception("Illegal move");
-      case BISHOP:
-        if (Math.abs(endRank-startRank) == Math.abs(endFile-startFile)) {
-          for (int i = 1; i < Math.abs(startRank-endRank); i++) {
-            int rank = startRank + (int) Math.copySign(i, endRank-startRank);
-            int file = startFile + (int) Math.copySign(i, endFile-startFile);
-            if (pieces[rank][file] != PieceType.EMPTY) {
-              throw new Exception("Illegal move");
-            }
-          }
-          if (pieces[endRank][endFile] != PieceType.EMPTY  &&  isValidCapture(endFile, endRank) == false) {
+          // Invalid diagonal
+          if (Math.abs(startFile-endFile) != 1  ||  endRank-startRank != upDirection(turn)) {
             throw new Exception("Illegal move");
           }
-          else {
-            break;
+          // Invalid capture
+          if (isValidCapture(endFile, endRank) == false) {
+            throw new Exception("Illegal move");
           }
         }
+        break;
+      case BISHOP:
+        // Invalid diagonal
+        if (Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
+          throw new Exception("Illegal move");
+        }
+        // Checks if all the squares it passes are blank
+        for (int i = 1; i < Math.abs(startRank-endRank); i++) {
+          int rank = startRank + (int) Math.copySign(i, endRank-startRank);
+          int file = startFile + (int) Math.copySign(i, endFile-startFile);
+          if (pieces[rank][file] != PieceType.EMPTY) {
+            throw new Exception("Illegal move");
+          }
+        }
+        // Invalid capture
+        if (pieces[endRank][endFile] != PieceType.EMPTY  &&  isValidCapture(endFile, endRank) == false) {
+          throw new Exception("Illegal move");
+        }
+        break;
+      case KNIGHT:
+        if (((endRank-startRank)^2 + (endFile-startFile)^2)  !=  5) {
+          throw new Exception("Illegal move");
+        }
+        break;
+      case ROOK:
+        // Make sure it moves in a straight line.
+        if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0) {
+          throw new Exception("Illegal move");
+        }
+        // Check to make sure nothing is in the way.
+        for (int i = 1; i < Math.abs(startRank-endRank) + Math.abs(startFile-endFile); i++) {
+          int rank = startRank + (int) Math.copySign(i, endRank-startRank);
+          int file = startFile + (int) Math.copySign(i, endFile-startFile);
+          if (pieces[rank][file] != PieceType.EMPTY) {
+            throw new Exception("Illegal move");
+          }
+        }
+        break;
+      case QUEEN:
+        // Invalid diagonal and invalid straight move
+        if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0
+            &&  Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
+          throw new Exception("Invalid move");
+        }
+        // Something in the way
+        for (int i = 1; i < Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)); i++) {
+          int rank = startRank + (int) Math.copySign(i, endRank-startRank);
+          int file = startFile + (int) Math.copySign(i, endFile-startFile);
+          if (pieces[rank][file] != PieceType.EMPTY) {
+            throw new Exception("Illegal move");
+          }
+        }
+        break;
+      case KING:
+        // Moves farther than one space
+        if (Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)) > 1) {
+          throw new Exception("Illegal move");
+        }
+        break;
       default:
         break;
     }
 
+    PieceType capturedPiece = pieces[endRank][endFile];
     pieces[endRank][endFile] = pieces[startRank][startFile];
     pieceOwners[endRank][endFile] = turn;
     pieces[startRank][startFile] = PieceType.EMPTY;
     pieceOwners[startRank][startFile] = Player.NONE;
+
+    inCheck = false;
+    if (inCheck) {
+      pieces[startRank][startFile] = pieces[endRank][endFile];
+      pieceOwners[startRank][startFile] = turn;
+      pieces[endRank][endFile] = capturedPiece;
+      if (capturedPiece != PieceType.EMPTY  &&  turn == Player.WHITE) {
+        pieceOwners[startRank][startFile] = Player.BLACK;
+      }
+      if (capturedPiece != PieceType.EMPTY  &&  turn == Player.BLACK) {
+        pieceOwners[startRank][startFile] = Player.WHITE;
+      }
+      throw new Exception("Illegal move");
+    }
 
     if (turn == Player.WHITE) {
       turn = Player.BLACK;
