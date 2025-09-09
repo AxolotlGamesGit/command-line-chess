@@ -215,7 +215,22 @@ public class GameState {
           }
         }
         throw new Exception("Illegal move");
-      
+      case BISHOP:
+        if (Math.abs(endRank-startRank) == Math.abs(endFile-startFile)) {
+          for (int i = 1; i < Math.abs(startRank-endRank); i++) {
+            int rank = startRank + (int) Math.copySign(i, endRank-startRank);
+            int file = startFile + (int) Math.copySign(i, endFile-startFile);
+            if (pieces[rank][file] != PieceType.EMPTY) {
+              throw new Exception("Illegal move");
+            }
+          }
+          if (pieces[endRank][endFile] != PieceType.EMPTY  &&  isValidCapture(endFile, endRank) == false) {
+            throw new Exception("Illegal move");
+          }
+          else {
+            break;
+          }
+        }
       default:
         break;
     }
