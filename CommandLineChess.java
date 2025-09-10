@@ -15,6 +15,13 @@ public class CommandLineChess {
       switch (tokens[0]) {
         case "display":
           System.out.println(state.toString(showRank, showFile));
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+          break;
+=======
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
         case "new":
           state = new GameState();
           System.out.println(state.toString(showRank, showFile));

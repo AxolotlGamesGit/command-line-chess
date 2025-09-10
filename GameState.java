@@ -1,5 +1,6 @@
 import java.util.Map;
-import static java.util.Map.entry;    
+import static java.util.Map.entry;
+import java.util.ArrayList;
 
 public class GameState { 
   public enum PieceType { 
@@ -63,7 +64,14 @@ public class GameState {
 
   private PieceType[][] pieces; 
   private Player[][] pieceOwners; 
-  private Player turn; 
+  private Player turn;
+  private boolean whiteShortCastling = true;
+  private boolean whiteLongCastling = true;
+  private boolean blackShortCastling = true;
+  private boolean blackLongCastling = true;
+  private ArrayList<PieceType> capturedPieces = new ArrayList<PieceType>();
+  private ArrayList<Integer[]> moves = new ArrayList<Integer[]>();
+    
   public GameState() { 
     pieces = STARTING_PIECES; 
     pieceOwners = STARTING_PLAYERS; 
@@ -80,7 +88,15 @@ public class GameState {
   * r n b q k b k r 
   */ 
   public String toString(boolean showRank, boolean showFile) { 
+<<<<<<< Updated upstream
     String result = ""; 
+=======
+<<<<<<< HEAD
+    String result = "\n"; 
+=======
+    String result = ""; 
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
     for (int i = 7; i >= 0; i--) { 
       for (int j = 0; j < 8; j++) { 
         if (pieceOwners[i][j] == Player.BLACK) { 
@@ -203,7 +219,15 @@ public class GameState {
     turn = oppositePlayer(turn);
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
+<<<<<<< Updated upstream
         if (pieces[i][j] != PieceType.EMPTY  &&  isPsuedoLegalMove(j, i, kingFile, kingRank)) {
+=======
+<<<<<<< HEAD
+        if (pieces[i][j] != PieceType.EMPTY  &&  isPsuedoLegalMove(i, j, kingRank, kingFile)) {
+=======
+        if (pieces[i][j] != PieceType.EMPTY  &&  isPsuedoLegalMove(j, i, kingFile, kingRank)) {
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
           turn = oppositePlayer(turn);
           System.out.println(j + " " + i);
           return true;
@@ -215,7 +239,15 @@ public class GameState {
     return false;
   }
 
+<<<<<<< Updated upstream
   private boolean isPsuedoLegalMove(int startFile, int startRank, int endFile, int endRank) {
+=======
+<<<<<<< HEAD
+  private boolean isPsuedoLegalMove(int startRank, int startFile, int endRank, int endFile) {
+=======
+  private boolean isPsuedoLegalMove(int startFile, int startRank, int endFile, int endRank) {
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
     if (startRank<0 || startRank>7 || startFile<0 || startFile>7 || endRank<0 || endRank>7 || endFile<0 || endFile>7) {
       return false;
     }
@@ -266,6 +298,30 @@ public class GameState {
           }
           // No capture
           if (pieces[endRank][endFile] == PieceType.EMPTY) {
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+            System.out.println(moves.get(moves.size() - 1));
+            // No pawn behind you
+            if (pieces[endRank - upDirection(turn)][endFile] != PieceType.PAWN) {
+              return false;
+            }
+            // Last move did not start on the opponents pawn rank
+            if (moves.get(moves.size()-1)[0] != (int) (3.5f-2.5f*(float)upDirection(oppositePlayer(turn)))) {
+              return false;
+            }
+            // Last move did not end on the correct square
+            if (moves.get(moves.size()-1)[2] != endRank-upDirection(turn)  ||  moves.get(moves.size()-1)[3] != endFile) {
+              return false;
+            }
+            // Capture the pawn we are taking
+            pieces[endRank - upDirection(turn)][endFile] = PieceType.EMPTY;
+            pieceOwners[endRank - upDirection(turn)][endFile] = Player.NONE;
+          }
+        }
+        return true;
+=======
+>>>>>>> Stashed changes
             boolean isEnPassant = false; // Change this later
             if (isEnPassant) {
               break;
@@ -274,6 +330,10 @@ public class GameState {
           }
         }
         break;
+<<<<<<< Updated upstream
+=======
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       case BISHOP:
         // Invalid diagonal
         if (Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
@@ -287,13 +347,29 @@ public class GameState {
             return false;
           }
         }
+<<<<<<< Updated upstream
         break;
+=======
+<<<<<<< HEAD
+        return true;
+=======
+        break;
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       case KNIGHT:
         // Check if the end square is the right distance away, no need to do sqrt
         if ((Math.pow((endRank-startRank), 2) + Math.pow((endFile-startFile), 2))  !=  (double) 5) {
           return false;
         }
+<<<<<<< Updated upstream
         break;
+=======
+<<<<<<< HEAD
+        return true;
+=======
+        break;
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       case ROOK:
         // Make sure it moves in a straight line.
         if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0) {
@@ -307,7 +383,15 @@ public class GameState {
             return false;
           }
         }
+<<<<<<< Updated upstream
         break;
+=======
+<<<<<<< HEAD
+        return true;
+=======
+        break;
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       case QUEEN:
         // Invalid diagonal and invalid straight move
         if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0
@@ -322,12 +406,35 @@ public class GameState {
             return false;
           }
         }
+<<<<<<< Updated upstream
         break;
+=======
+<<<<<<< HEAD
+        return true;
+=======
+        break;
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       case KING:
         // Moves farther than one space
         if (Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)) > 1) {
           return false;
         }
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+        return true;
+      default:
+        break;
+    }
+    
+    return false;
+  }
+
+  private void move(int startRank, int startFile, int endRank, int endFile) throws Exception {
+    if (isPsuedoLegalMove(startRank, startFile, endRank, endFile) == false) {
+=======
+>>>>>>> Stashed changes
         break;
       default:
         break;
@@ -338,6 +445,10 @@ public class GameState {
 
   private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
     if (isPsuedoLegalMove(startFile, startRank, endFile, endRank) == false) {
+<<<<<<< Updated upstream
+=======
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
       throw new Exception("Illegal move");
     }
 
@@ -359,6 +470,15 @@ public class GameState {
     }
 
     turn = oppositePlayer(turn);
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+    Integer[] move = new Integer[] {startRank, startFile, endRank, endFile};
+    moves.add(move);
+    capturedPieces.add(capturedPiece);
+=======
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
   }
 
   public void parseMove(String move) throws Exception {
@@ -396,6 +516,14 @@ public class GameState {
       // Queen side
     }
 
+<<<<<<< Updated upstream
     move(startFile, startRank, endFile, endRank);
+=======
+<<<<<<< HEAD
+    move(startRank, startFile, endRank, endFile);
+=======
+    move(startFile, startRank, endFile, endRank);
+>>>>>>> 803f6717b6ba9e3868d1bc2f15befd05b4734b39
+>>>>>>> Stashed changes
   }
 }
