@@ -20,7 +20,7 @@ unix-chess
    - --showfile [true/false]
 
 ## Project Status
-Right now, the "new" and "quit" commands work, and the "move" command with custom notation works. Right now en passant, castling, checks, and checkmate don't work.
+Right now, the "new", "quit" and "settings" commands work, and the "move" command with custom notation works. Right now en passant, castling, checks, and checkmate don't work.
 
 ## Example
 ```

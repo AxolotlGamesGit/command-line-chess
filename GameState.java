@@ -79,7 +79,7 @@ public class GameState {
   * p p p p p p p p 
   * r n b q k b k r 
   */ 
-  public String toString() { 
+  public String toString(boolean showRank, boolean showFile) { 
     String result = ""; 
     for (int i = 7; i >= 0; i--) { 
       for (int j = 0; j < 8; j++) { 
@@ -138,8 +138,14 @@ public class GameState {
         }
         result += " "; 
       }
+      if (showRank) {
+        result += i+1;
+      }
       result += "\n"; 
-    } 
+    }
+    if (showFile) {
+      result += "a b c d e f g h \n";
+    }
     switch(turn) { 
       case WHITE: 
         result += "White to move"; 
@@ -167,10 +173,6 @@ public class GameState {
     return 0;
   }
 
-  private boolean isValidCapture(int endFile, int endRank) {
-    return pieces[endRank][endFile] != PieceType.EMPTY  &&  pieceOwners[endRank][endFile] != turn;
-  }
-
   private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
     if (startRank<0 || startRank>7 || startFile<0 || startFile>7 || endRank<0 || endRank>7 || endFile<0 || endFile>7) {
       throw new Exception("Args not in bounds");
@@ -180,6 +182,12 @@ public class GameState {
     }
     if (pieceOwners[startRank][startFile] != turn) {
       throw new Exception("Can't move that piece");
+    }
+    if (startFile == endFile  &&  startRank == endRank) {
+      throw new Exception("Must move a piece");
+    }
+    if (pieceOwners[endRank][endFile] == turn) {
+      throw new Exception("Cannot take you own piece");
     }
     boolean inCheck = false;
     if (inCheck) {
@@ -216,8 +224,12 @@ public class GameState {
           if (Math.abs(startFile-endFile) != 1  ||  endRank-startRank != upDirection(turn)) {
             throw new Exception("Illegal move");
           }
-          // Invalid capture
-          if (isValidCapture(endFile, endRank) == false) {
+          // No capture
+          if (pieces[endRank][endFile] == PieceType.EMPTY) {
+            boolean isEnPassant = false; // Change this later
+            if (isEnPassant) {
+              break;
+            }
             throw new Exception("Illegal move");
           }
         }
@@ -235,13 +247,10 @@ public class GameState {
             throw new Exception("Illegal move");
           }
         }
-        // Invalid capture
-        if (pieces[endRank][endFile] != PieceType.EMPTY  &&  isValidCapture(endFile, endRank) == false) {
-          throw new Exception("Illegal move");
-        }
         break;
       case KNIGHT:
-        if (((endRank-startRank)^2 + (endFile-startFile)^2)  !=  5) {
+        // Check if the end square is the right distance away, no need to do sqrt
+        if ((Math.pow((endRank-startRank), 2) + Math.pow((endFile-startFile), 2))  !=  (double) 5) {
           throw new Exception("Illegal move");
         }
         break;
@@ -252,8 +261,8 @@ public class GameState {
         }
         // Check to make sure nothing is in the way.
         for (int i = 1; i < Math.abs(startRank-endRank) + Math.abs(startFile-endFile); i++) {
-          int rank = startRank + (int) Math.copySign(i, endRank-startRank);
-          int file = startFile + (int) Math.copySign(i, endFile-startFile);
+          int rank = startRank + i * (int) Math.signum(endRank-startRank);
+          int file = startFile + i * (int) Math.signum(endFile-startFile);
           if (pieces[rank][file] != PieceType.EMPTY) {
             throw new Exception("Illegal move");
           }
@@ -265,10 +274,10 @@ public class GameState {
             &&  Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
           throw new Exception("Invalid move");
         }
-        // Something in the way
+        // Check to see if anything is in the way
         for (int i = 1; i < Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)); i++) {
-          int rank = startRank + (int) Math.copySign(i, endRank-startRank);
-          int file = startFile + (int) Math.copySign(i, endFile-startFile);
+          int rank = startRank + i * (int) Math.signum(endRank-startRank);
+          int file = startFile + i * (int) Math.signum(endFile-startFile);
           if (pieces[rank][file] != PieceType.EMPTY) {
             throw new Exception("Illegal move");
           }

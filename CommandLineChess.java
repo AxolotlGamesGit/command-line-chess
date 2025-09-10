@@ -5,6 +5,8 @@ public class CommandLineChess {
   public static void main(String[] args) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     GameState state = new GameState();
+    boolean showRank = false;
+    boolean showFile = true;
     boolean isRunning = true;
 
     while(isRunning) {
@@ -13,7 +15,7 @@ public class CommandLineChess {
       switch (tokens[0]) {
         case "new":
           state = new GameState();
-          System.out.println(state.toString());
+          System.out.println(state.toString(showRank, showFile));
           break;
         case "quit":
           isRunning = false;
@@ -26,7 +28,7 @@ public class CommandLineChess {
           System.out.println("Processing move: " + tokens[1]);
           try {
             state.parseMove(tokens[1]);
-            System.out.println(state.toString());
+            System.out.println(state.toString(showRank, showFile));
           } 
           catch (Exception e) {
             System.out.println("Invalid move: " + e);
@@ -36,10 +38,10 @@ public class CommandLineChess {
           switch(tokens[1]) {
             case "":
             case " ":
-            case "-pgn":
+            case "--pgn":
               System.out.println("Saving to pgn");
               break;
-            case "-fen":
+            case "--fen":
               System.out.println("Saving to fen");
               break;
             default:
@@ -50,14 +52,69 @@ public class CommandLineChess {
           switch(tokens[1]) {
             case "":
             case " ":
-            case "-pgn":
+            case "--pgn":
               System.out.println("Loading from pgn");
               break;
-            case "-fen":
+            case "--fen":
               System.out.println("Loading from fen");
               break;
             default:
               System.out.println("Invalid token: " + tokens[1]);
+          }
+          break;
+        case "settings":
+          if (tokens.length < 2) {
+            System.out.println("Show rank: " + showRank);
+            System.out.println("Show file: " + showFile);
+            break;
+          }
+          for (int i = 1; i < tokens.length; i++) {
+            switch (tokens[i]) {
+              case "--showrank":
+                if (tokens.length > i+1) {
+                  switch (tokens[i+1]) {
+                    case "true":
+                    case "True":
+                      showRank = true;
+                      i++;
+                      break;
+                    case "false":
+                    case "False":
+                      showRank = false;
+                      i++;
+                      break;
+                    default:
+                      System.out.println("Show rank: " + showRank);
+                      break;
+                  }
+                  break;
+                }
+                System.out.println("Show rank: " + showRank);
+                break;
+              case "--showfile":
+                if (tokens.length > i+1) {
+                  switch (tokens[i+1]) {
+                    case "true":
+                    case "True":
+                      showFile = true;
+                      i++;
+                      break;
+                    case "false":
+                    case "False":
+                      showFile = false;
+                      i++;
+                      break;
+                    default:
+                      System.out.println("Show file: " + showFile);
+                      break;
+                  }
+                  break;
+                }
+                System.out.println("Show file: " + showFile);
+                break;
+              default:
+                break;
+            }
           }
           break;
         default:
