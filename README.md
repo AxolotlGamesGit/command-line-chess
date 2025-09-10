@@ -5,6 +5,7 @@ Simple chess program in the command line
 unix-chess
 - new
 - quit
+- display
 - move
    - [algebraic chess notation]
    - [square1->square2 (a1->b2)]
@@ -40,6 +41,7 @@ a b c d e f g h
 White to move
 
 h@penguin:~$ settings --showrank false --showfile false
+h@penguin:~$ display
 
 r n b q k b n r
 p p p p p p p p

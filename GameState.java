@@ -148,15 +148,18 @@ public class GameState {
     }
     switch(turn) { 
       case WHITE: 
-        result += "White to move"; 
+        result += "White to move \n"; 
         break; 
       case BLACK: 
-        result += "Black to move"; 
+        result += "Black to move \n"; 
         break; 
       case NONE: 
-        result += "Game over"; 
+        result += "Game over \n"; 
         break; 
-    } 
+    }
+    if (inCheck()) {
+      result += "You are in check!";
+    }
     return result; 
   } 
 
@@ -173,27 +176,60 @@ public class GameState {
     return 0;
   }
 
-  private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
+  private static Player oppositePlayer(Player player) {
+    switch (player) {
+      case WHITE:
+        return Player.BLACK;
+      case BLACK:
+        return Player.WHITE;
+      case NONE:
+        return Player.NONE;
+    }
+    return Player.NONE;
+  }
+
+  private boolean inCheck() {
+    int kingRank = 0;
+    int kingFile = 0;
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (pieces[i][j] == PieceType.KING  &&  pieceOwners[i][j] == turn) {
+          kingRank = i;
+          kingFile = j;
+        }
+      }
+    }
+
+    turn = oppositePlayer(turn);
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (pieces[i][j] != PieceType.EMPTY  &&  isPsuedoLegalMove(j, i, kingFile, kingRank)) {
+          turn = oppositePlayer(turn);
+          System.out.println(j + " " + i);
+          return true;
+        }
+      }
+    }
+    turn = oppositePlayer(turn);
+
+    return false;
+  }
+
+  private boolean isPsuedoLegalMove(int startFile, int startRank, int endFile, int endRank) {
     if (startRank<0 || startRank>7 || startFile<0 || startFile>7 || endRank<0 || endRank>7 || endFile<0 || endFile>7) {
-      throw new Exception("Args not in bounds");
+      return false;
     }
     if (pieces[startRank][startFile] == PieceType.EMPTY) {
-      throw new Exception("No piece found");
+      return false;
     }
     if (pieceOwners[startRank][startFile] != turn) {
-      throw new Exception("Can't move that piece");
+      return false;
     }
     if (startFile == endFile  &&  startRank == endRank) {
-      throw new Exception("Must move a piece");
+      return false;
     }
     if (pieceOwners[endRank][endFile] == turn) {
-      throw new Exception("Cannot take you own piece");
-    }
-    boolean inCheck = false;
-    if (inCheck) {
-      // check to see if the move puts you out of check
-      // if so, continue
-      // if not, throw illegal move exception
+      return false;
     }
     switch (pieces[startRank][startFile]) {
       case PAWN:
@@ -203,26 +239,30 @@ public class GameState {
           if (endRank-startRank == upDirection(turn)) {
             // Is already occupied
             if (pieces[endRank][endFile] != PieceType.EMPTY) {
-              throw new Exception("Illegal move");
+              return false;
             }
           }
           // Moved up 2
           else if (endRank-startRank == 2*upDirection(turn)) {
             // Checks if the two spaces in front are empty
             if (pieces[endRank][endFile] != PieceType.EMPTY  ||  pieces[startRank+upDirection(turn)][endFile] != PieceType.EMPTY) {
-              throw new Exception("Illegal move");
+              return false;
             }
             // Wrong starting rank
             if (startRank != (int) (3.5f-2.5f*(float)upDirection(turn))) {
-              throw new Exception("Illegal move");
+              return false;
             }
+          }
+          // Moved more than 2 spaces.
+          else {
+            return false;
           }
         }
         // Taking move
         else {
           // Invalid diagonal
           if (Math.abs(startFile-endFile) != 1  ||  endRank-startRank != upDirection(turn)) {
-            throw new Exception("Illegal move");
+            return false;
           }
           // No capture
           if (pieces[endRank][endFile] == PieceType.EMPTY) {
@@ -230,41 +270,41 @@ public class GameState {
             if (isEnPassant) {
               break;
             }
-            throw new Exception("Illegal move");
+            return false;
           }
         }
         break;
       case BISHOP:
         // Invalid diagonal
         if (Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
-          throw new Exception("Illegal move");
+          return false;
         }
         // Checks if all the squares it passes are blank
         for (int i = 1; i < Math.abs(startRank-endRank); i++) {
           int rank = startRank + (int) Math.copySign(i, endRank-startRank);
           int file = startFile + (int) Math.copySign(i, endFile-startFile);
           if (pieces[rank][file] != PieceType.EMPTY) {
-            throw new Exception("Illegal move");
+            return false;
           }
         }
         break;
       case KNIGHT:
         // Check if the end square is the right distance away, no need to do sqrt
         if ((Math.pow((endRank-startRank), 2) + Math.pow((endFile-startFile), 2))  !=  (double) 5) {
-          throw new Exception("Illegal move");
+          return false;
         }
         break;
       case ROOK:
         // Make sure it moves in a straight line.
         if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0) {
-          throw new Exception("Illegal move");
+          return false;
         }
         // Check to make sure nothing is in the way.
         for (int i = 1; i < Math.abs(startRank-endRank) + Math.abs(startFile-endFile); i++) {
           int rank = startRank + i * (int) Math.signum(endRank-startRank);
           int file = startFile + i * (int) Math.signum(endFile-startFile);
           if (pieces[rank][file] != PieceType.EMPTY) {
-            throw new Exception("Illegal move");
+            return false;
           }
         }
         break;
@@ -272,25 +312,33 @@ public class GameState {
         // Invalid diagonal and invalid straight move
         if (Math.abs(startRank-endRank) != 0  &&  Math.abs(startFile-endFile) != 0
             &&  Math.abs(endRank-startRank) != Math.abs(endFile-startFile)) {
-          throw new Exception("Invalid move");
+          return false;
         }
         // Check to see if anything is in the way
         for (int i = 1; i < Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)); i++) {
           int rank = startRank + i * (int) Math.signum(endRank-startRank);
           int file = startFile + i * (int) Math.signum(endFile-startFile);
           if (pieces[rank][file] != PieceType.EMPTY) {
-            throw new Exception("Illegal move");
+            return false;
           }
         }
         break;
       case KING:
         // Moves farther than one space
         if (Math.max(Math.abs(startRank-endRank), Math.abs(startFile-endFile)) > 1) {
-          throw new Exception("Illegal move");
+          return false;
         }
         break;
       default:
         break;
+    }
+
+    return true;
+  }
+
+  private void move(int startFile, int startRank, int endFile, int endRank) throws Exception {
+    if (isPsuedoLegalMove(startFile, startRank, endFile, endRank) == false) {
+      throw new Exception("Illegal move");
     }
 
     PieceType capturedPiece = pieces[endRank][endFile];
@@ -299,26 +347,18 @@ public class GameState {
     pieces[startRank][startFile] = PieceType.EMPTY;
     pieceOwners[startRank][startFile] = Player.NONE;
 
-    inCheck = false;
-    if (inCheck) {
+    if (inCheck()) {
       pieces[startRank][startFile] = pieces[endRank][endFile];
       pieceOwners[startRank][startFile] = turn;
       pieces[endRank][endFile] = capturedPiece;
-      if (capturedPiece != PieceType.EMPTY  &&  turn == Player.WHITE) {
-        pieceOwners[startRank][startFile] = Player.BLACK;
+      if (capturedPiece != PieceType.EMPTY) {
+        pieceOwners[endRank][endFile] = oppositePlayer(turn);
       }
-      if (capturedPiece != PieceType.EMPTY  &&  turn == Player.BLACK) {
-        pieceOwners[startRank][startFile] = Player.WHITE;
-      }
-      throw new Exception("Illegal move");
+
+      throw new Exception("Illegal move - you are in check");
     }
 
-    if (turn == Player.WHITE) {
-      turn = Player.BLACK;
-    }
-    else {
-      turn = Player.WHITE;
-    }
+    turn = oppositePlayer(turn);
   }
 
   public void parseMove(String move) throws Exception {

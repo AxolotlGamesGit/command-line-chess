@@ -5,7 +5,7 @@ public class CommandLineChess {
   public static void main(String[] args) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     GameState state = new GameState();
-    boolean showRank = false;
+    boolean showRank = true;
     boolean showFile = true;
     boolean isRunning = true;
 
@@ -13,6 +13,8 @@ public class CommandLineChess {
       String input = reader.readLine();
       String[] tokens = getTokens(input);
       switch (tokens[0]) {
+        case "display":
+          System.out.println(state.toString(showRank, showFile));
         case "new":
           state = new GameState();
           System.out.println(state.toString(showRank, showFile));
