@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Map;
+import static java.util.Map.entry;
 
 public class CommandLineChess {
   public static void main(String[] args) throws IOException {
@@ -28,9 +30,9 @@ public class CommandLineChess {
             System.out.println("Please provide a move");
             break;
           }
-          System.out.println("Processing move: " + tokens[1]);
           try {
-            state.parseMove(tokens[1]);
+            Move move = parseMove(tokens[1]);
+            state.move(move);
             System.out.println(state.toString(showRank, showFile));
           } 
           catch (Exception e) {
@@ -149,5 +151,77 @@ public class CommandLineChess {
       outputArray[i] = output.get(i);
     }
     return outputArray;
+  }
+  
+  public static Move parseMove(String moveString) throws Exception {
+    final Map<Character, Integer> FILES = Map.ofEntries(
+      entry('a', 0),
+      entry('b', 1),
+      entry('c', 2),
+      entry('d', 3),
+      entry('e', 4),
+      entry('f', 5),
+      entry('g', 6),
+      entry('h', 7)
+    );
+    final Map<Character, Integer> RANKS = Map.ofEntries(
+      entry('1', 0),
+      entry('2', 1),
+      entry('3', 2),
+      entry('4', 3),
+      entry('5', 4),
+      entry('6', 5),
+      entry('7', 6),
+      entry('8', 7)
+    );
+    final Map<Character, Piece.PieceType> PIECES = Map.ofEntries(
+      entry('P', Piece.PieceType.PAWN),
+      entry('N', Piece.PieceType.KNIGHT),
+      entry('B', Piece.PieceType.BISHOP),
+      entry('R', Piece.PieceType.ROOK),
+      entry('Q', Piece.PieceType.QUEEN),
+      entry('K', Piece.PieceType.KING)
+    );
+    
+    Move move = new Move();
+    if (moveString.length() < 2) {
+      throw new Exception("Move not even long enough");
+    }
+    // Custom notation (a1->h8, ect)
+    if ((moveString.length() == 6  ||  moveString.length() == 9)  &&  moveString.charAt(2) == '-'  &&  moveString.charAt(3) == '>') {
+      // Start square
+      if (FILES.containsKey(moveString.charAt(0))  &&  RANKS.containsKey(moveString.charAt(1))) {
+        move.startFile = FILES.get(moveString.charAt(0));
+        move.startRank = RANKS.get(moveString.charAt(1));
+      }
+      else {
+        throw new Exception("Invalid starting square");
+      }
+        
+      // End square
+      if (FILES.containsKey(moveString.charAt(4))  &&  RANKS.containsKey(moveString.charAt(5))) {
+        move.endFile = FILES.get(moveString.charAt(4));
+        move.endRank = RANKS.get(moveString.charAt(5));
+      }
+      else {
+        throw new Exception("Invalid ending square");
+      }
+      
+      // Pawn promotion
+      if (moveString.length() == 9  &&  moveString.charAt(6) == '-'  &&  moveString.charAt(7) == '>') {
+        if (PIECES.containsKey(moveString.charAt(8))) {
+          move.moveType = Move.MoveType.PROMOTION;
+          move.promotionPiece = PIECES.get(moveString.charAt(8));
+        }
+      }
+    }
+    else if (moveString == "0-0"  ||  moveString == "O-O") {
+      // King side
+    }
+    else if (moveString == "0-0-0"  ||  moveString == "O-O-O") {
+      // Queen side
+    }
+
+    return move;
   }
 }

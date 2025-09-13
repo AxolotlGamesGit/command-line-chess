@@ -30,4 +30,22 @@ public class Move {
     moveType = MoveType.NONE;
     promotionPiece = Piece.PieceType.EMPTY;
   }
+  
+  public Move(int sRank, int sFile, int eRank, int eFile, MoveType mType) {
+    startRank = sRank;
+    startFile = sFile;
+    endRank = eRank;
+    endFile = eFile;
+    moveType = mType;
+    promotionPiece = Piece.PieceType.EMPTY;
+  }
+  
+  public Move(int sRank, int sFile, int eRank, int eFile, Piece.PieceType pPiece) {
+    startRank = sRank;
+    startFile = sFile;
+    endRank = eRank;
+    endFile = eFile;
+    moveType = MoveType.PROMOTION;
+    promotionPiece = pPiece;
+  }
 }

@@ -21,7 +21,7 @@ unix-chess
    - --showfile [true/false]
 
 ## Project Status
-Right now, the "new", "quit" and "settings" commands work, and the "move" command with custom notation works. Right now en passant, castling, checks, and checkmate don't work.
+Right now, the "new", "quit" and "settings" commands work, and the "move" command with custom notation works. Special moves and check work, but checkmate and stalemate have not been implemented.
 
 ## Example
 ```

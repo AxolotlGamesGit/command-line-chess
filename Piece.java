@@ -11,9 +11,8 @@ public class Piece {
   public enum Colour { 
     NONE, 
     WHITE, 
-    BLACK 
+    BLACK
   }
-
   public PieceType piece;
   public Colour colour;
 
